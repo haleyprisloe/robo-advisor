@@ -17,9 +17,16 @@ parsed_response = json.loads(response.text)
 
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
 
-latest_close = parsed_response["Time Series (Daily)"]["2021-03-03"]["4. close"]
 # breakpoint()
 
+tsd = parsed_response["Time Series (Daily)"]
+
+dates = list(tsd.keys()) #todo: sort to ensure latest day is first
+
+#assuming latest day is first
+latest_day = dates[0]
+
+latest_close = tsd[latest_day]["4. close"]
 
 # INFO OUTPUTS 
 
@@ -30,7 +37,7 @@ print("REQUESTING STOCK MARKET DATA...")
 print("REQUEST AT: 2018-02-20 02:00pm") # to do: get current day/time
 print("-------------------------")
 print(f"LATEST DAY: {last_refreshed}")
-print(f"LATEST CLOSE: {latest_close}")
+print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
 print("RECENT HIGH: $101,000.00")
 print("RECENT LOW: $99,000.00")
 print("-------------------------")
