@@ -9,37 +9,55 @@ import requests
 
 load_dotenv()
 
+#code for date/time copied from w3resource.com
+import datetime
+now = datetime.datetime.now()
+
+#for sorting dates
+from datetime import datetime
+
 # currency format conversion def given
 def to_usd(my_price):
     return f"${my_price:,.2f}" #> $12,000.71
 
 # INFO INPUTS
+
+while True:
+    symbol = input("Please specify the stock or cryptocurrency symbol you are interested in exploring (ex. 'MSFT').")
+    if len(symbol) > 5:
+        print("Oh, expecting a properly-formed stock symbol like 'MSFT'. Please try again.")
+        True
+    else:
+        if not symbol.isalpha():
+            print("Oh, expecting a properly-formed stock symbol like 'MSFT'. Please try again.")
+            True
+        else:
+            break
+
 api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
-print(api_key)
-symbol = "MSFT" # TODO: ask user for this
 
-request_url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}"
+get_response = requests.get(f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}")
 
-response = requests.get(request_url)
+parsed_response = json.loads(get_response.text)
 
-parsed_response = json.loads(response.text)
-
-last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
-
-# breakpoint()
+#try/except method adapted from https://www.pythonforbeginners.com/error-handling/python-try-and-except
+try:
+    last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
+except:
+    print("Stock symbol not found. Please start over and try again.")
+    exit()
 
 tsd = parsed_response["Time Series (Daily)"]
 
-dates = list(tsd.keys()) #todo: sort to ensure latest day is first
+dates = list(tsd.keys())
 
-#assuming latest day is first
+# sort dates from recent to least recent
+dates.sort(key = lambda date: datetime.strptime(date, '%Y-%m-%d'), reverse=True) 
+
+# latest day is now first in the list
 latest_day = dates[0]
 
 latest_close = tsd[latest_day]["4. close"]
-
-#max of all high prices
-#high_prices = [___]
-#recent_high = max(high_prices)
 
 high_prices = []
 low_prices = []
@@ -73,11 +91,22 @@ with open(csv_file_path, "w") as csv_file: # "w" means "open the file for writin
             "volume": daily_prices["5. volume"]
         })
 
+date = now.strftime("%Y-%m-%d %H:%M %p")
+
+# DETERMINE RECOMMENDATION:
+#
+#
+#
+
+
+
+
+
 print("-------------------------")
-print("SELECTED SYMBOL: XYZ")
+print(f"SELECTED SYMBOL: {symbol}")
 print("-------------------------")
 print("REQUESTING STOCK MARKET DATA")
-print("REQUEST AT: 2018-02-20 02:00pm") # to do: get current day/time
+print("REQUEST AT:", date)
 print("-------------------------")
 print(f"LATEST DAY: {last_refreshed}")
 print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
@@ -91,3 +120,7 @@ print(f"WRITING DATA TO CSV: {csv_file_path}...")
 print("-------------------------")
 print("HAPPY INVESTING!")
 print("-------------------------")
+
+
+# if latest close is less than half way between high and low, buy
+# if latest close is more than half way between high and low, don't buy
