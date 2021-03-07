@@ -1,19 +1,20 @@
 # this is the "app/robo_advisor.py" file
 
+# referenced Prof. Rossetti's screencast
 import csv
 import json
 import os
 from dotenv import load_dotenv
-
 import requests
 
 load_dotenv()
 
-#code for date/time copied from w3resource.com
+# code for date/time copied from w3resource.com
 import datetime
 now = datetime.datetime.now()
 
-#for sorting dates
+# for sorting dates
+# referenced https://www.geeksforgeeks.org/python-sort-list-of-dates-given-as-strings/
 from datetime import datetime
 
 # currency format conversion def given
@@ -21,7 +22,6 @@ def to_usd(my_price):
     return f"${my_price:,.2f}" #> $12,000.71
 
 # INFO INPUTS
-
 while True:
     symbol = input("Please specify the stock or cryptocurrency symbol you are interested in exploring (ex. 'MSFT').")
     if len(symbol) > 5:
@@ -34,10 +34,13 @@ while True:
         else:
             break
 
+# get API key from the env file
 api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 
+# access data using ticker and API key
 get_response = requests.get(f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&apikey={api_key}")
 
+# utilize json package
 parsed_response = json.loads(get_response.text)
 
 #try/except method adapted from https://www.pythonforbeginners.com/error-handling/python-try-and-except
@@ -48,10 +51,10 @@ except:
     exit()
 
 tsd = parsed_response["Time Series (Daily)"]
-
 dates = list(tsd.keys())
 
 # sort dates from recent to least recent
+# adapted from https://www.geeksforgeeks.org/python-sort-list-of-dates-given-as-strings/
 dates.sort(key = lambda date: datetime.strptime(date, '%Y-%m-%d'), reverse=True) 
 
 # latest day is now first in the list
@@ -59,10 +62,12 @@ latest_day = dates[0]
 
 latest_close = tsd[latest_day]["4. close"]
 
+# empty lists
 high_prices = []
 low_prices = []
 closing_prices = []
 
+# append data to appropriate lists
 for date in dates:
     high_price = tsd[date]["2. high"]
     low_price = tsd[date]["3. low"]
@@ -71,18 +76,20 @@ for date in dates:
     low_prices.append(float(low_price))
     closing_prices.append(float(closing_price))
 
+# define recent max and min
 recent_high = max(high_prices)
 recent_low = min(low_prices)
 
 # INFO OUTPUTS 
 
+# print to csv file
 csv_file_path = os.path.join(os.path.dirname(__file__), "..", "data", "prices.csv")
 
 csv_headers = ["timestamp", "open", "high", "low", "close", "volume"]
 
-with open(csv_file_path, "w") as csv_file: # "w" means "open the file for writing"
+with open(csv_file_path, "w") as csv_file:
     writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
-    writer.writeheader() # uses fieldnames set above
+    writer.writeheader()
     for date in dates:
         daily_prices = tsd[date]
         writer.writerow({
@@ -94,11 +101,10 @@ with open(csv_file_path, "w") as csv_file: # "w" means "open the file for writin
             "volume": daily_prices["5. volume"]
         })
 
+# take current date and time/format
 date = now.strftime("%Y-%m-%d %H:%M %p")
 
 # DETERMINE RECOMMENDATION:
-#
-#
 
 high_low_diff = recent_high - recent_low
 # if latest close is less than half way between high and low, buy
@@ -108,6 +114,7 @@ if float(latest_close) < (high_low_diff/2):
 else:
     decision = "DON'T BUY"
 
+# print information for the user
 print("-------------------------")
 print(f"SELECTED SYMBOL: {symbol}")
 print("-------------------------")
