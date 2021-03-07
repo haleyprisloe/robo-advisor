@@ -61,12 +61,15 @@ latest_close = tsd[latest_day]["4. close"]
 
 high_prices = []
 low_prices = []
+closing_prices = []
 
 for date in dates:
     high_price = tsd[date]["2. high"]
     low_price = tsd[date]["3. low"]
+    closing_price = tsd[date]["4. close"]
     high_prices.append(float(high_price))
     low_prices.append(float(low_price))
+    closing_prices.append(float(closing_price))
 
 recent_high = max(high_prices)
 recent_low = min(low_prices)
@@ -127,5 +130,29 @@ print(f"WRITING DATA TO CSV: {csv_file_path}...")
 print("-------------------------")
 print("HAPPY INVESTING!")
 print("-------------------------")
+
+# for graph referenced:
+# https://github.com/prof-rossetti/intro-to-python/blob/master/notes/python/packages/matplotlib.md
+# https://matplotlib.org/stable/gallery/ticks_and_spines/major_minor_demo.html
+# https://matplotlib.org/2.0.2/users/pyplot_tutorial.html
+graph = input("Would you like to view a graph of this stock's recent prices? Please enter 'Y' or 'N'.")
+if graph == "Y" or graph == "y":
+    print(f"Please reference pop-up window for the graph of recent prices for {symbol}. To end program, close graph window.")
+    import matplotlib
+    import matplotlib.pyplot as plt
+    import matplotlib.ticker as ticker
+
+    formatter = ticker.FormatStrFormatter('$%1.2f')
+    fig, ax = plt.subplots()
+    ax.xaxis.set_major_locator(plt.LinearLocator(8))
+    ax.yaxis.set_major_formatter(formatter)
+
+    ax.plot(dates, closing_prices)
+    plt.xlabel('DATE')
+    plt.ylabel('CLOSING PRICE')
+    plt.title(f'CLOSING STOCK PRICES FOR {symbol}')
+    plt.show()
+else:
+    print("Thank you for using the robo advisor. Goodbye.")
 
 

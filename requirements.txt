@@ -3,4 +3,5 @@
 
 requests
 python-dotenv
+matplotlib
 # pandas 
