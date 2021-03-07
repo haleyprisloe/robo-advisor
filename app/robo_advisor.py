@@ -98,11 +98,12 @@ date = now.strftime("%Y-%m-%d %H:%M %p")
 #
 
 high_low_diff = recent_high - recent_low
+# if latest close is less than half way between high and low, buy
+# if latest close is more than half way between high and low, don't buy
 if float(latest_close) < (high_low_diff/2):
     decision = "BUY"
 else:
     decision = "DON'T BUY"
-
 
 print("-------------------------")
 print(f"SELECTED SYMBOL: {symbol}")
@@ -115,8 +116,12 @@ print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
 print(f"RECENT HIGH: {to_usd(float(recent_high))}")
 print(f"RECENT LOW: {to_usd(float(recent_low))}")
 print("-------------------------")
-print("RECOMMENDATION: BUY!")
-print("RECOMMENDATION REASON: TODO")
+if decision == "BUY":
+    print("RECOMMENDATION: BUY!")
+    print("RECOMMENDATION REASON: We recommend that you buy this stock because the latest closing price is less than the average of the recent high price and recent low price, meaning that the stock is relatively cheap right now. Buy low!")
+if decision == "DON'T BUY":
+    print("RECOMMENDATION: DON'T BUY!")
+    print("RECOMMENDATION REASON: We recommend that you don't buy this stock right now because the latest closing price is equal to or more than the average of the recent high price and recent low price, meaning that the stock is relatively expensive right now. Buy low!")
 print("-------------------------")
 print(f"WRITING DATA TO CSV: {csv_file_path}...")
 print("-------------------------")
@@ -124,5 +129,3 @@ print("HAPPY INVESTING!")
 print("-------------------------")
 
 
-# if latest close is less than half way between high and low, buy
-# if latest close is more than half way between high and low, don't buy
