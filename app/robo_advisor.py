@@ -96,10 +96,12 @@ date = now.strftime("%Y-%m-%d %H:%M %p")
 # DETERMINE RECOMMENDATION:
 #
 #
-#
 
-
-
+high_low_diff = recent_high - recent_low
+if float(latest_close) < (high_low_diff/2):
+    decision = "BUY"
+else:
+    decision = "DON'T BUY"
 
 
 print("-------------------------")
